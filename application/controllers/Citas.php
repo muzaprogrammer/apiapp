@@ -21,12 +21,12 @@ class Citas extends REST_Controller {
 	}
 
 	public function login() {
-		extract($_REQUEST);
+		extract($_GET);
 		$this->seguridad_get($user,$pass);
 	}
 
 	public function sucursales_get() {
-		extract($_REQUEST);
+		extract($_GET);
 		if ($this->seguridad_get($user,$pass)) {
 			$sucursales = $this->datos->sucursales();
 			if (count($sucursales)>0) {
@@ -38,7 +38,7 @@ class Citas extends REST_Controller {
 	}
 
 	public function especialidades_get() {
-		extract($_REQUEST);
+		extract($_GET);
 		if ($this->seguridad_get($user,$pass)) {
 			$especialidades = $this->datos->especialidades($idsucursal);
 			if (count($especialidades)>0) {
@@ -50,7 +50,7 @@ class Citas extends REST_Controller {
 	}
 
 	public function medicos_get() {
-		extract($_REQUEST);
+		extract($_GET);
 		if ($this->seguridad_get($user,$pass)) {
 			$medicos = $this->datos->medicos($idsucursal,$idespecialidad);
 			if (count($medicos)>0) {

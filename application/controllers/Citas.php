@@ -57,4 +57,16 @@ class Citas extends REST_Controller {
 		}
 	}
 
+	public function procedimientos_get() {
+		extract($_GET);
+		if ($this->seguridad_get()) {
+			$procedimientos = $this->datos->procedimientos($medico);
+			if (count($procedimientos)>0) {
+				$this->response(['procedimientos'=>$procedimientos],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se encontraron medicos'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
+
 }

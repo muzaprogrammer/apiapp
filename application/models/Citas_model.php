@@ -74,7 +74,7 @@ class Citas_model extends CI_model {
 		return $medicos;
 	}
 
-	public function procedimientos($medico) {
+	public function procedimientos($idmedico) {
 		$procedimientos = $this->db->query("
 			SELECT
 				procedimientos_medicos_especialidades.id_procedimiento_medico_especialidad, procedimientos_medicos_especialidades.periodo_minimo, TIME_FORMAT(procedimientos_medicos_especialidades.periodo_minimo, '%H:%i') AS 'periodo', procedimientos_medicos.nombre_procedimiento
@@ -83,7 +83,7 @@ class Citas_model extends CI_model {
 				INNER JOIN procedimientos_medicos_especialidades ON procedimientos_medicos_especialidades.id_especialidad = medicos.id_especialidad
 				INNER JOIN procedimientos_medicos ON procedimientos_medicos.id_procedimiento_medico = procedimientos_medicos_especialidades.id_procedimiento_medico
 			WHERE
-				medicos.idmedico = $medico AND procedimientos_medicos_especialidades.estado = 1;
+				medicos.idmedico = $idmedico AND procedimientos_medicos_especialidades.estado = 1;
 		")->result_array();
 		return $procedimientos;
 	}

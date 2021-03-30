@@ -78,7 +78,7 @@ class Citas extends REST_Controller {
 	public function procedimientos_get() {
 		extract($_GET);
 		if ($this->seguridad()) {
-			$procedimientos = $this->datos->procedimientos($medico);
+			$procedimientos = $this->datos->procedimientos($idmedico);
 			if (count($procedimientos)>0) {
 				$this->response(['procedimientos'=>$procedimientos],parent::HTTP_OK);
 			} else {

@@ -12,8 +12,7 @@ class Citas extends REST_Controller {
 		$this->load->model('Citas_model','datos');
 	}
 
-	function seguridad_get() {
-		extract($_REQUEST);
+	function seguridad_get($user,$pass) {
 		$secury = $this->datos->seguridad($user,$pass);
 		if (!$secury) {
 			$this->response(['msg'=>'No autorizado'],parent::HTTP_UNAUTHORIZED);
@@ -21,9 +20,14 @@ class Citas extends REST_Controller {
 		return $secury;
 	}
 
+	public function login() {
+		extract($_REQUEST);
+		$this->seguridad_get($user,$pass)
+	}
+
 	public function sucursales_get() {
 		extract($_REQUEST);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad_get($user,$pass)) {
 			$sucursales = $this->datos->sucursales();
 			if (count($sucursales)>0) {
 				$this->response(['sucursales'=>$sucursales],parent::HTTP_OK);
@@ -35,7 +39,7 @@ class Citas extends REST_Controller {
 
 	public function especialidades_get() {
 		extract($_REQUEST);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad_get($user,$pass)) {
 			$especialidades = $this->datos->especialidades($idsucursal);
 			if (count($especialidades)>0) {
 				$this->response(['especialidades'=>$especialidades],parent::HTTP_OK);
@@ -47,7 +51,7 @@ class Citas extends REST_Controller {
 
 	public function medicos_get() {
 		extract($_REQUEST);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad_get($user,$pass)) {
 			$medicos = $this->datos->medicos($idsucursal,$idespecialidad);
 			if (count($medicos)>0) {
 				$this->response(['medicos'=>$medicos],parent::HTTP_OK);

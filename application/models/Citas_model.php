@@ -19,6 +19,17 @@ class Citas_model extends CI_model {
 		}
 	}
 
+	public function buscar_pacientes($text) {
+		$sql="SELECT idexpediente, nombre_completo FROM expedientes WHERE estado=0 ";
+		$bus=explode(" ", $text);
+		foreach ($bus as $key => $value) {
+			$sql.="AND concat_ws(' ',nombres,apellidos) LIKE '%".$value."%'";
+		}
+		$sql.="ORDER BY idexpediente DESC LIMIT 0,500";
+		$pacientes = $this->db->query($sql)->result_array();
+		return $pacientes;
+	}
+
 	public function sucursales() {
 		$sucursales = $this->db->query("
 			SELECT idsucursal, sucursal FROM sucursales

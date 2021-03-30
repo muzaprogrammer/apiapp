@@ -27,6 +27,18 @@ class Citas extends REST_Controller {
 		}
 	}
 
+	public function buscar_pacientes_get() {
+		extract($_GET);
+		if ($this->seguridad()) {
+			$pacientes = $this->datos->buscar_pacientes($text);
+			if (count($pacientes)>0) {
+				$this->response(['pacientes'=>$pacientes],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se encontraron pacientes'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
+
 	public function sucursales_get() {
 		extract($_GET);
 		if ($this->seguridad()) {

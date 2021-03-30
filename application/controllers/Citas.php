@@ -22,7 +22,7 @@ class Citas extends REST_Controller {
 
 	public function login() {
 		extract($_REQUEST);
-		$this->seguridad_get($user,$pass)
+		$this->seguridad_get($user,$pass);
 	}
 
 	public function sucursales_get() {

@@ -12,7 +12,7 @@ class Citas extends REST_Controller {
 		$this->load->model('Citas_model','datos');
 	}
 
-	function seguridad_get() {
+	function seguridad() {
 		extract($_GET);
 		$secury = $this->datos->seguridad($user,$pass);
 		if (!$secury) {
@@ -21,9 +21,15 @@ class Citas extends REST_Controller {
 		return $secury;
 	}
 
+	public function login_get() {
+		if ($this->seguridad()) {
+			$this->response(true,parent::HTTP_OK);
+		}
+	}
+
 	public function sucursales_get() {
 		extract($_GET);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad()) {
 			$sucursales = $this->datos->sucursales();
 			if (count($sucursales)>0) {
 				$this->response(['sucursales'=>$sucursales],parent::HTTP_OK);
@@ -35,7 +41,7 @@ class Citas extends REST_Controller {
 
 	public function especialidades_get() {
 		extract($_GET);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad()) {
 			$especialidades = $this->datos->especialidades($idsucursal);
 			if (count($especialidades)>0) {
 				$this->response(['especialidades'=>$especialidades],parent::HTTP_OK);
@@ -47,7 +53,7 @@ class Citas extends REST_Controller {
 
 	public function medicos_get() {
 		extract($_GET);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad()) {
 			$medicos = $this->datos->medicos($idsucursal,$idespecialidad);
 			if (count($medicos)>0) {
 				$this->response(['medicos'=>$medicos],parent::HTTP_OK);
@@ -59,7 +65,7 @@ class Citas extends REST_Controller {
 
 	public function procedimientos_get() {
 		extract($_GET);
-		if ($this->seguridad_get()) {
+		if ($this->seguridad()) {
 			$procedimientos = $this->datos->procedimientos($medico);
 			if (count($procedimientos)>0) {
 				$this->response(['procedimientos'=>$procedimientos],parent::HTTP_OK);

@@ -53,7 +53,3 @@ $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-
-$route['citas'] = 'citas';
-$route['citas/sucursales'] = 'citas/sucursales';
-$route['citas/especialidades'] = 'citas/especialidades';

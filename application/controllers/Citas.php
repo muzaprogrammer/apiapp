@@ -23,7 +23,7 @@ class Citas extends REST_Controller {
 
 	public function login_get() {
 		if ($this->seguridad()) {
-			$this->response(true,parent::HTTP_OK);
+			$this->response(['msg'=>"true"],parent::HTTP_OK);
 		}
 	}
 

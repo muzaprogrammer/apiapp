@@ -241,7 +241,7 @@ class Citas_model extends CI_model {
 		}
 	}
 
-	public function horas_hasta($horaDesde ,  $idProcedimiento  ,  $fecha ,  $idMedico){
+	public function horas_hasta($horaDesde,$idProcedimiento,$fecha,$idMedico){
 		$fecha   =  date('Y-m-d'  , strtotime($fecha)   );
 		$incrementosHoras = 5;  //Incrementos de 15 minutos entre cada hora
 		$horasDisponibles =  array();
@@ -277,7 +277,7 @@ class Citas_model extends CI_model {
 		return $horasDisponibles;
 	}
 
-	public function  obtenerHorarioMedicoHasta($idMedico  ,  $fecha   , $horaDesde , $horaFinalizacionHorario   ){
+	public function obtenerHorarioMedicoHasta($idMedico,$fecha,$horaDesde,$horaFinalizacionHorario){
 		$horaInicio =  date("H" ,  strtotime($horaDesde)   );
 		$horaFin =  date("H" , strtotime($horaFinalizacionHorario)   );
 		$sqlHorarioMedico = "SELECT * , TIME_FORMAT( ADDTIME( CONCAT(hora,':00:00' ), '01:00:00' ) ,'%H') AS limite  FROM horas 
@@ -289,5 +289,80 @@ class Citas_model extends CI_model {
 		return $horarioMedico;
 	}
 
+	public function nueva_cita($user,$pass,$ide,$fecha_reserva,$horas,$horasFin,$idPeriodoProcedimientoMedico,$medico,$sucursal){
+		$hora_reserva = $horas;
+		$hora_reserva = date('H:i:s', strtotime($hora_reserva));
+		$hora_reservanew = date('H:i:s', strtotime($horasFin));  //Hora fin establecida desde formulario
+		$start = $fecha_reserva . " " . $hora_reserva;
+		$start2 = $fecha_reserva . " " . $hora_reservanew;
+		$fechactual = date("d-m-Y");
+		$fechacomp = $fecha_reserva;
+		$fechahora = date('Y-m-d H:i:s', strtotime($start));
+		$fechahorafin = date('Y-m-d H:i:s', strtotime($start2));
+		$res_fichas_existe = 0;
+
+		$idProcedimientoMedico =  $idPeriodoProcedimientoMedico;
+		//$idProcedimientoMedico = $this->obtenerProcedimientoMedico($idPeriodoProcedimientoMedico);
+
+		//CONDICION PARA RESERVAS CITAS
+		$reservaCitas = "  '$horas'   BETWEEN   ADDTIME(  TIME(fechahora) , '00:01:00'     )  AND   SUBTIME( TIME(fechahorafin)  , '00:01:00'    )  OR
+   '$horasFin'   BETWEEN    ADDTIME(  TIME(fechahora) , '00:01:00'     )  AND   SUBTIME( TIME(fechahorafin)  , '00:01:00'    )   OR
+   ADDTIME(  TIME(fechahora) , '00:01:00'     )   BETWEEN   '$horas'  AND '$horasFin'  OR
+   SUBTIME( TIME(fechahorafin)  , '00:01:00'    )  BETWEEN   '$horas'  AND '$horasFin'  ";
+
+
+//CONDICION PARA RESERVAS FICHAS
+		$reservaFichas = "  '$horas'  BETWEEN ADDTIME(  hora_cita , '00:01:00'   ) AND SUBTIME(   hora_fin  , '00:01:00'     )   OR
+    '$horasFin'   BETWEEN   ADDTIME(  hora_cita , '00:01:00'   ) AND SUBTIME(   hora_fin  , '00:01:00'     )   OR
+    ADDTIME(  hora_cita , '00:01:00'   )   BETWEEN   '$horas'  AND '$horasFin'  OR
+    SUBTIME(  hora_fin , '00:01:00'  )  BETWEEN   '$horas'  AND '$horasFin'      ";
+
+//SI LA RESERVA EXISTE
+		$query1 = $this->db->query("SELECT COUNT(*) AS num FROM reserva_citas WHERE idexpediente='".$ide."' AND idmedico='".$medico."' AND fechahora='".$fechahora."' AND   ( status=1 OR status=2 ) AND  (  $reservaCitas )   ");
+		foreach ($query1->result_array() as $row1) {
+			$res_existe = $row1['num'];
+		}
+		$query2 = $this->db->query("SELECT COUNT(*) AS num FROM reserva_citas WHERE idmedico='".$medico."' AND fechahora='".$fechahora."' AND ( status=1  OR status=2 )   AND  (   $reservaCitas  )   ");
+		foreach ($query2->result_array() as $row2) {
+			$horario_existe = $row2['num'];
+		}
+		$query3 = $this->db->query("
+			SELECT idusuario FROM usuarios WHERE usuario = '$user' AND password = '$pass'
+		");
+		foreach ($query3->result_array() as $row3) {
+			$usuario = $row3['idusuario'];
+		}
+		/*FIN RESERVAS FICHAS*/
+		/*  if(strtotime($fechacomp)<strtotime($fechactual)) {  return 2;  } else */
+		if($res_existe>0){
+			return 2;
+		} else if ($horario_existe>0){
+			return 3;
+		}else {
+			$fecha_creacion = date('Y-m-d');
+				$hora_creacion = date('H:i:s');
+				$hora_limite = date('H:i:s',strtotime( '+4 hours',strtotime($hora_creacion)));
+				$cita_urgente = ($horas <= $hora_limite && $fecha_reserva == $fecha_creacion) ? 1 : 0;
+				$data = array(
+					'idexpediente' => $ide,
+					'fechahora' => $fechahora,
+					'fechahorafin' => $fechahorafin,
+					'fecha' => date("Y-m-d",strtotime($fecha_reserva)),
+					'hora' => date("H:i:s",strtotime($hora_reserva)),
+					'idmedico' => $medico,
+					'observaciones' => '',
+					'status' => 2,
+					'fecha_creacion' => date("Y-m-d"),
+					'hora_creacion'=> date("H:i:s"),
+					'idusuario' => $usuario,
+					'idsucursal' => $sucursal,
+					'id_procedimiento_medico'=>  $idProcedimientoMedico ,
+					'origen' => 'Sistema App Crear citas',
+					'cita_urgente' => $cita_urgente
+				);
+				$this->db->insert('reserva_citas', $data);
+				return 1;
+		}
+	}
 
 }

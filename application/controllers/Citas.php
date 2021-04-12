@@ -89,7 +89,6 @@ class Citas extends REST_Controller {
 
 	public function horas_desde_get() {
 		extract($_GET);
-		ini_set('max_execution_time', '3000'); //300 seconds = 5 minutes
 		if ($this->seguridad()) {
 			$horas_desde = $this->datos->horas_desde($idprocedimiento,$fecha,$idmedico);
 			if (count($horas_desde)>0) {
@@ -100,15 +99,26 @@ class Citas extends REST_Controller {
 		}
 	}
 
-	public function horas_hasta_get() {
+	public function hora_hasta_get() {
 		extract($_GET);
-		ini_set('max_execution_time', '3000'); //300 seconds = 5 minutes
 		if ($this->seguridad()) {
-			$horas_hasta = $this->datos->horas_hasta($hora_inicio,$idprocedimiento,$fecha,$idmedico);
-			if (count($horas_hasta)>0) {
-				$this->response(['horas_hasta'=>$horas_hasta[0]],parent::HTTP_OK);
+			$hora_hasta = $this->datos->hora_hasta($hora_inicio,$idprocedimiento,$fecha,$idmedico);
+			if (count($hora_hasta)>0) {
+				$this->response(['hora_hasta'=>$hora_hasta[0]],parent::HTTP_OK);
 			} else {
 				$this->response(['msg'=>'No se encontraron horas'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
+
+	public function nueva_cita_get() {
+		extract($_GET);
+		if ($this->seguridad()) {
+			$nueva_cita = $this->datos->nueva_cita($user,$pass,$idexpediente,$fecha,$hora_desde,$hora_hasta,$idprocedimiento,$idmedico,$idsucursal);
+			if ($nueva_cita>0) {
+				$this->response(['nueva_cita'=>$nueva_cita],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se pudo crear la cita'],parent::HTTP_NOT_FOUND);
 			}
 		}
 	}

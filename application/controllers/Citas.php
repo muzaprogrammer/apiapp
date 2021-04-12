@@ -82,7 +82,20 @@ class Citas extends REST_Controller {
 			if (count($procedimientos)>0) {
 				$this->response(['procedimientos'=>$procedimientos],parent::HTTP_OK);
 			} else {
-				$this->response(['msg'=>'No se encontraron medicos'],parent::HTTP_NOT_FOUND);
+				$this->response(['msg'=>'No se encontraron procedimientos'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
+
+	public function horas_desde_get() {
+		extract($_GET);
+		ini_set('max_execution_time', '3000'); //300 seconds = 5 minutes
+		if ($this->seguridad()) {
+			$horas_desde = $this->datos->horas_desde($idprocedimiento,$fecha,$idmedico);
+			if (count($horas_desde)>0) {
+				$this->response(['horas_desde'=>$horas_desde],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se encontraron horas'],parent::HTTP_NOT_FOUND);
 			}
 		}
 	}

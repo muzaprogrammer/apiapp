@@ -241,5 +241,53 @@ class Citas_model extends CI_model {
 		}
 	}
 
+	public function horas_hasta($horaDesde ,  $idProcedimiento  ,  $fecha ,  $idMedico){
+		$fecha   =  date('Y-m-d'  , strtotime($fecha)   );
+		$incrementosHoras = 5;  //Incrementos de 15 minutos entre cada hora
+		$horasDisponibles =  array();
+
+		$horasHorarioMedico = $this->obtenerHoraInicioFinHorario($idMedico , $fecha); //Obtiene hora de inicio y hora fin de horario
+
+		if($horasHorarioMedico[0]['horaInicio'] != NULL  &&  $horasHorarioMedico[0]['horaFin']!=NULL ){
+			$periodoMinimoProcedimiento =  $this->obtenerPeriodoProcedimiento($idProcedimiento);  //Periodo minimo establecido para el procedimiento
+			$horaInicioHorario = $horasHorarioMedico[0]['horaInicio'].":00:00";
+			$horaFinalizacionHorario =  $horasHorarioMedico[0]['horaFin'].":00:00";   //VALIDAR POR FAVOR QUE EL MEDICO TENGA HORARIO DISPONIBLE
+			$horaFinalizacionHorario = (new DateTime($horaFinalizacionHorario))->modify("+1 hours")->format("H:i:s");
+			$horaDesde = $this->sumarHoras(   $horaDesde , $periodoMinimoProcedimiento     );
+			$horario = $this->obtenerHorarioMedicoHasta(   $idMedico , $fecha , $horaDesde  , $horaFinalizacionHorario );  //Horario del medico para la fecha especificada , desde una hora especificada
+			$disponibilidad = true;
+
+			foreach ($horario as $key => $hora) {
+				$inicio = (  $key== 0  ?  intval(date("i",  strtotime($horaDesde))) :  0   );
+				for(  $i = $inicio ;  $i <60 ;  ($i+= $incrementosHoras)    ){ //Iteraciones por hora
+					$horaIteracion   =  $hora['hora'].":".(   ($i < 10 ) ? "0".$i : $i  ).":00";
+
+					$disponibilidad = $this->verificarDisponibilidadHorario2( 0 ,   $horaIteracion , $fecha ,  $idMedico ,"00:00:00" , 0  );  //Validacion de disponibilidad del horario para la hora exacta
+					if( $disponibilidad  &&   ( $horaIteracion <= $horaFinalizacionHorario)  ){
+						$horasDisponibles[] =  $horaIteracion;
+					}else{
+						break;
+					}
+				}
+				if(!$disponibilidad){
+					break;
+				}
+			}
+		}
+		return $horasDisponibles;
+	}
+
+	public function  obtenerHorarioMedicoHasta($idMedico  ,  $fecha   , $horaDesde , $horaFinalizacionHorario   ){
+		$horaInicio =  date("H" ,  strtotime($horaDesde)   );
+		$horaFin =  date("H" , strtotime($horaFinalizacionHorario)   );
+		$sqlHorarioMedico = "SELECT * , TIME_FORMAT( ADDTIME( CONCAT(hora,':00:00' ), '01:00:00' ) ,'%H') AS limite  FROM horas 
+        LEFT JOIN medicos_horarios
+        ON (medicos_horarios.idhorario =  horas.idhora AND medicos_horarios.fecha = '$fecha' AND  medicos_horarios.estado = 0 AND  medicos_horarios.idmedico =$idMedico )
+        WHERE horas.hora BETWEEN $horaInicio AND $horaFin  ";
+		$horarioMedico = $this->db->query($sqlHorarioMedico)->result_array();
+
+		return $horarioMedico;
+	}
+
 
 }

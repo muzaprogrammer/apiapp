@@ -100,4 +100,16 @@ class Citas extends REST_Controller {
 		}
 	}
 
+	public function horas_hasta_get() {
+		extract($_GET);
+		ini_set('max_execution_time', '3000'); //300 seconds = 5 minutes
+		if ($this->seguridad()) {
+			$horas_hasta = $this->datos->horas_hasta($hora_inicio,$idprocedimiento,$fecha,$idmedico)[0];
+			if (count($horas_hasta)>0) {
+				$this->response(['horas_hasta'=>$horas_hasta],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se encontraron horas'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
 }

@@ -372,7 +372,7 @@ class Citas_model extends CI_model {
 		return $estados;
 	}
 
-	public function ver_citas($idestado,$idsucursal,$idmedico,$idreservacita){
+	public function ver_citas($idestado,$idsucursal,$idespecialidad,$idmedico,$idreservacita){
 		$estado='';
 		if ($idestado>0){
 			$estado = "AND rc.status = $idestado";

@@ -138,7 +138,7 @@ class Citas extends REST_Controller {
 	public function ver_citas_get() {
 		extract($_GET);
 		if ($this->seguridad()) {
-			$citas = $this->datos->ver_citas($idestado,$idsucursal,$idmedico,$idreservacita);
+			$citas = $this->datos->ver_citas($idestado,$idsucursal,$idespecialidad,$idmedico,$idreservacita);
 			if (count($citas)>0) {
 				$this->response(['citas'=>$citas],parent::HTTP_OK);
 			} else {

@@ -241,7 +241,7 @@ class Citas_model extends CI_model {
 		}
 	}
 
-	public function horas_hasta($horaDesde,$idProcedimiento,$fecha,$idMedico){
+	public function hora_hasta($horaDesde,$idProcedimiento,$fecha,$idMedico){
 		$fecha   =  date('Y-m-d'  , strtotime($fecha)   );
 		$incrementosHoras = 5;  //Incrementos de 15 minutos entre cada hora
 		$horasDisponibles =  array();

@@ -114,11 +114,35 @@ class Citas extends REST_Controller {
 	public function nueva_cita_get() {
 		extract($_GET);
 		if ($this->seguridad()) {
-			$nueva_cita = $this->datos->nueva_cita($user,$pass,$idexpediente,$fecha,$hora_desde,$hora_hasta,$idprocedimiento,$idmedico,$idsucursal);
+			$nueva_cita = $this->datos->nueva_cita($user,$pass,$idexpediente,$fecha,$hora_desde,$hora_hasta,$idprocedimiento,$idmedico,$idsucursal,$observaciones);
 			if ($nueva_cita>0) {
 				$this->response(['nueva_cita'=>$nueva_cita],parent::HTTP_OK);
 			} else {
 				$this->response(['msg'=>'No se pudo crear la cita'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
+
+	public function estados_get() {
+		extract($_GET);
+		if ($this->seguridad()) {
+			$estados = $this->datos->estados();
+			if (count($estados)>0) {
+				$this->response(['estados'=>$estados],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se encontraron estados'],parent::HTTP_NOT_FOUND);
+			}
+		}
+	}
+
+	public function ver_citas_get() {
+		extract($_GET);
+		if ($this->seguridad()) {
+			$citas = $this->datos->ver_citas($idestado,$idsucursal,$idmedico,$idreservacita);
+			if (count($citas)>0) {
+				$this->response(['citas'=>$citas],parent::HTTP_OK);
+			} else {
+				$this->response(['msg'=>'No se encontraron citas'],parent::HTTP_NOT_FOUND);
 			}
 		}
 	}

@@ -289,7 +289,7 @@ class Citas_model extends CI_model {
 		return $horarioMedico;
 	}
 
-	public function nueva_cita($user,$pass,$ide,$fecha_reserva,$horas,$horasFin,$idPeriodoProcedimientoMedico,$medico,$sucursal){
+	public function nueva_cita($user,$pass,$ide,$fecha_reserva,$horas,$horasFin,$idPeriodoProcedimientoMedico,$medico,$sucursal,$observaciones){
 		$hora_reserva = $horas;
 		$hora_reserva = date('H:i:s', strtotime($hora_reserva));
 		$hora_reservanew = date('H:i:s', strtotime($horasFin));  //Hora fin establecida desde formulario
@@ -350,7 +350,7 @@ class Citas_model extends CI_model {
 					'fecha' => date("Y-m-d",strtotime($fecha_reserva)),
 					'hora' => date("H:i:s",strtotime($hora_reserva)),
 					'idmedico' => $medico,
-					'observaciones' => '',
+					'observaciones' => $observaciones,
 					'status' => 2,
 					'fecha_creacion' => date("Y-m-d"),
 					'hora_creacion'=> date("H:i:s"),
@@ -363,6 +363,95 @@ class Citas_model extends CI_model {
 				$this->db->insert('reserva_citas', $data);
 				return 1;
 		}
+	}
+
+	public function estados() {
+		$estados = $this->db->query("
+			SELECT id_estado as idestado, estado FROM estado_reserva
+		")->result_array();
+		return $estados;
+	}
+
+	public function ver_citas($idestado,$idsucursal,$idmedico,$idreservacita){
+		$estado='';
+		if ($idestado>0){
+			$estado = "AND rc.status = $idestado";
+		}
+		$sucursal='';
+		if ($idsucursal>0){
+			$sucursal = "AND rc.idsucursal = $idsucursal";
+		}
+		$medico='';
+		if ($idmedico>0){
+			$medico = "AND rc.idmedico = $idmedico";
+		}
+		$reserva='';
+		if ($idreservacita>0){
+			$reserva = "AND idreservacita = $idreservacita";
+		}
+		$json = array();
+		$query = $this->db->query("
+		SELECT
+		  CONCAT(me.nombres, ' ', me.apellidos) AS 'nombre_medico',
+		  me.backgroundColor,
+		  ex.nombre_completo AS 'nombre_expediente',
+		  ex.correo_electronico AS 'correo_expediente',
+		  er.estado AS 'estado_cita',
+		  es.id_especialidad AS 'idespecialidad',
+		  es.especialidad,
+		  su.idsucursal,
+		  su.sucursal,
+		  id_procedimiento_medico_especialidad,
+		  pm.nombre_procedimiento,
+		  us.nombre AS 'nombre_usuario',
+		  rc.*
+		FROM
+		  reserva_citas rc
+			INNER JOIN medicos me ON me.idmedico = rc.idmedico
+			INNER JOIN especialidades es ON es.id_especialidad = me.id_especialidad
+			INNER JOIN expedientes ex ON ex.idexpediente = rc.idexpediente
+			INNER JOIN estado_reserva er ON er.id_estado = rc.status
+			INNER JOIN sucursales su ON su.idsucursal = rc.idsucursal
+			INNER JOIN procedimientos_medicos_especialidades pr ON pr.id_procedimiento_medico_especialidad = rc.id_procedimiento_medico
+			INNER JOIN procedimientos_medicos pm ON pm.id_procedimiento_medico = pr.id_procedimiento_medico
+			INNER JOIN usuarios us ON us.idusuario = rc.idusuario
+		WHERE
+		  rc.fecha >= '20210101'
+		  $estado
+		  $sucursal
+		  $medico
+		  $reserva
+		LIMIT 10000");
+		foreach ($query->result_array() as $row) {
+			$e = array();
+
+			$e['idreservacita']       = $row['idreservacita'];
+			$e['fecha']               = date("d-m-Y", strtotime($row['fecha']));
+			$e['hora_inicio']         = date('H:i:s', strtotime($row['fechahora']));
+			$e['hora_fin']            = date('H:i:s', strtotime($row['fechahorafin']));
+			$e['idmedico']            = $row['idmedico'];
+			$e['nombre_medico']       = $row['nombre_medico'];
+			$e['idespecialidad']      = $row['idespecialidad'];
+			$e['especialidad']        = $row['especialidad'];
+			$e['id_procedimiento']    = $row['id_procedimiento_medico_especialidad'];
+			$e['procedimiento']       = $row['nombre_procedimiento'];
+			$e['idsucursal']          = $row['idsucursal'];
+			$e['sucursal']            = $row['sucursal'];
+			$e['idexpediente']        = $row['idexpediente'];
+			$e['nombre_expediente']   = $row['nombre_expediente'];
+			$e['correo_expediente']   = $row['correo_expediente'];
+			$e['idusuario']           = $row['idusuario'];
+			$e['nombre_usuario']      = $row['nombre_usuario'];
+			$e['color']     		  = trim($row['backgroundColor']);
+			$e['idestadocita']        = $row['status'];
+			$e['estado_cita']         = $row['estado_cita'];
+			$e['observaciones']       = $row['observaciones'];
+			$e['origen_cita']         = $row['origen'];
+			$e['fecha_creacion']      = date("d-m-Y", strtotime($row['fecha_creacion']));
+			$e['hora_creacion']       = date('H:i:s', strtotime($row['hora_creacion']));
+			array_push($json, $e);
+		}
+		return $json;
 	}
 
 }

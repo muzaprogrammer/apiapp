@@ -454,4 +454,15 @@ class Citas_model extends CI_model {
 		return $json;
 	}
 
+	public function cambiar_estado($idreservacita,$estado) {
+		$this->db->where('idreservacita', $idreservacita);
+		$this->db->set('status', $estado);
+		if ($this->db->update('reserva_citas')){
+			return 1;
+		}else{
+			return 0;
+		}
+
+	}
+
 }

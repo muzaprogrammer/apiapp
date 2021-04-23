@@ -151,7 +151,7 @@ class Citas extends REST_Controller {
 		extract($_GET);
 		if ($this->seguridad()) {
 			$cambio = $this->datos->cambiar_estado($idreservacita,$idestado);
-			if (count($cambio)>0) {
+			if ($cambio>0) {
 				$this->response(['msg'=>'OK'],parent::HTTP_OK);
 			} else {
 				$this->response(['msg'=>'Hubo un error'],parent::HTTP_NOT_FOUND);

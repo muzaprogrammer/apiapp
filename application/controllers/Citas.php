@@ -158,4 +158,10 @@ class Citas extends REST_Controller {
 			}
 		}
 	}
+
+	public function crear_usuario_get() {
+		extract($_GET);
+		$resp = $this->datos->agregar_usuario($nombre,$usuario,$clave);
+		$this->response(['msg'=>$resp],parent::HTTP_OK);
+	}
 }

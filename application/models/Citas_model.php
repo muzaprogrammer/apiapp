@@ -10,7 +10,7 @@ class Citas_model extends CI_model {
 
 	public function seguridad($user,$pass) {
 		$query = $this->db->query("
-			SELECT * FROM usuarios WHERE usuario = '$user' AND password = '$pass'
+			SELECT * FROM usuarios WHERE usuario = '$user' AND password = '$pass' AND estado = 1
 		");
 		if ($query->num_rows() > 0) {
 			return true;
@@ -463,6 +463,36 @@ class Citas_model extends CI_model {
 			return 0;
 		}
 
+	}
+
+	public function agregar_usuario($nombre,$user,$pass){
+		$query=$this->db->query("SELECT COUNT(*) as num FROM usuarios WHERE usuario = '".$user."'");
+		foreach ($query->result_array() as $row)
+		{
+			$numuser = $row['num'];
+		}
+		if($numuser==0) {
+			$data = array(
+				'usuario' => $user,
+				'password' => $pass,
+				'idrol' => 20,
+				'nombre' => $nombre,
+				'dui' => '00000000-0',
+				'estado' => 1,
+				'idsucursal' => 1,
+				'autorizar' => 0,
+				'texto_firma'=>''
+			);
+			if($this->db->insert('usuarios',$data)) {
+				return "Usuario creado con exito";
+			}
+			else {
+				return "Error al crear usuario";
+			}
+		}
+		else {
+			return "Usuario ya existe";
+		}
 	}
 
 }

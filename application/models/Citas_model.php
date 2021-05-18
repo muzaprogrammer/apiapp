@@ -372,7 +372,7 @@ class Citas_model extends CI_model {
 		return $estados;
 	}
 
-	public function ver_citas($idestado,$idsucursal,$idespecialidad,$idmedico,$idreservacita){
+	public function ver_citas($idestado,$idsucursal,$idespecialidad,$idmedico,$idreservacita,$idexpediente){
 		$estado='';
 		if ($idestado>0){
 			$estado = "AND rc.status = $idestado";
@@ -388,6 +388,10 @@ class Citas_model extends CI_model {
 		$reserva='';
 		if ($idreservacita>0){
 			$reserva = "AND idreservacita = $idreservacita";
+		}
+		$expediente='';
+		if ($idexpediente>0){
+			$reserva = "AND rc.idexpediente = $idexpediente";
 		}
 		$json = array();
 		$query = $this->db->query("
@@ -421,6 +425,7 @@ class Citas_model extends CI_model {
 		  $sucursal
 		  $medico
 		  $reserva
+		  $expediente
 		LIMIT 10000");
 		foreach ($query->result_array() as $row) {
 			$e = array();

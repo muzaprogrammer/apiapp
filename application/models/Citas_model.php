@@ -32,7 +32,7 @@ class Citas_model extends CI_model {
 
 	public function sucursales() {
 		$sucursales = $this->db->query("
-			SELECT idsucursal, sucursal FROM sucursales
+			SELECT idsucursal, sucursal FROM sucursales WHERE status = 0
 		")->result_array();
 		return $sucursales;
 	}
